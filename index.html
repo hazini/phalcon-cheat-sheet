@@ -34,6 +34,7 @@
                     <a href="#section-1">MVC</a>
                 </li>
                 <li><a href="#section-2">ORM</a></li>
+                <li><a href="#section-2.1">Query Builder</a></li>
                 <li><a href="#section-3">ODM for Mongo</a></li>
                 <li><a href="#section-4">Template Engine (Volt)</a></li>
                 <li><a href="#section-5">DI/IOC</a></li>
@@ -292,6 +293,135 @@ $robots->count();
             </pre>
             <hr>
             <!-- END ORM -->
+
+             <!-- BEGIN Query Builder -->
+            <h2 id="section-2.1"><a class="headerlink" href="https://docs.phalconphp.com/en/3.0.2/api/Phalcon_Mvc_Model_Query_Builder.html">¶</a> Query Builder</h2>
+            <pre>
+                <code class="php">
+
+// Getting a whole set
+$robots = $this->modelsManager->createBuilder()
+    ->from("Robots")
+    ->join("RobotsParts")
+    ->orderBy("Robots.name")
+    ->getQuery()
+    ->execute();
+
+// Getting the first row
+$robots = $this->modelsManager->createBuilder()
+    ->from("Robots")
+    ->join("RobotsParts")
+    ->orderBy("Robots.name")
+    ->getQuery()
+    ->getSingleResult();
+
+$params = array(
+    'models'     => array('Users'),
+    'columns'    => array('id', 'name', 'status'),
+    'conditions' => array(
+        array(
+            "created > :min: AND created < :max:",
+            array("min" => '2013-01-01',   'max' => '2014-01-01'),
+            array("min" => PDO::PARAM_STR, 'max' => PDO::PARAM_STR),
+        ),
+    ),
+    // or 'conditions' => "created > '2013-01-01' AND created < '2014-01-01'",
+    'group'      => array('id', 'name'),
+    'having'     => "name = 'Kamil'",
+    'order'      => array('name', 'id'),
+    'limit'      => 20,
+    'offset'     => 20,
+    // or 'limit' => array(20, 20),
+);
+$queryBuilder = new \Phalcon\Mvc\Model\Query\Builder($params);
+
+$builder->distinct("status");
+$builder->distinct(null);
+
+$builder->columns("id, name");
+$builder->columns(array('id', 'name'));
+  $builder->columns(array('name', 'number' => 'COUNT(*)'));
+
+$builder->from('Robots');
+$builder->from(array('Robots', 'RobotsParts'));
+$builder->from(array('r' => 'Robots', 'rp' => 'RobotsParts'));
+
+  // Load data from models Robots
+$builder->addFrom('Robots');
+
+  // Load data from model 'Robots' using 'r' as alias in PHQL
+$builder->addFrom('Robots', 'r');
+
+  // Load data from model 'Robots' using 'r' as alias in PHQL
+  // and eager load model 'RobotsParts'
+$builder->addFrom('Robots', 'r', 'RobotsParts');
+
+  // Load data from model 'Robots' using 'r' as alias in PHQL
+  // and eager load models 'RobotsParts' and 'Parts'
+$builder->addFrom('Robots', 'r', ['RobotsParts', 'Parts']);
+
+  // Inner Join model 'Robots' with automatic conditions and alias
+$builder->join('Robots');
+
+  // Inner Join model 'Robots' specifing conditions
+$builder->join('Robots', 'Robots.id = RobotsParts.robots_id');
+
+  // Inner Join model 'Robots' specifing conditions and alias
+$builder->join('Robots', 'r.id = RobotsParts.robots_id', 'r');
+
+  // Left Join model 'Robots' specifing conditions, alias and type of join
+$builder->join('Robots', 'r.id = RobotsParts.robots_id', 'r', 'LEFT');
+
+  // Inner Join model 'Robots' with automatic conditions and alias
+$builder->innerJoin('Robots');
+
+  // Inner Join model 'Robots' specifing conditions
+$builder->innerJoin('Robots', 'Robots.id = RobotsParts.robots_id');
+
+  // Inner Join model 'Robots' specifing conditions and alias
+$builder->innerJoin('Robots', 'r.id = RobotsParts.robots_id', 'r');
+
+$builder->leftJoin('Robots', 'r.id = RobotsParts.robots_id', 'r');
+
+$builder->rightJoin('Robots', 'r.id = RobotsParts.robots_id', 'r');
+
+$builder->where(100);
+$builder->where('name = "Peter"');
+$builder->where('name = :name: AND id > :id:', array('name' => 'Peter', 'id' => 100));
+
+$builder->andWhere('name = "Peter"');
+$builder->andWhere('name = :name: AND id > :id:', array('name' => 'Peter', 'id' => 100));
+
+$builder->orWhere('name = "Peter"');
+$builder->orWhere('name = :name: AND id > :id:', array('name' => 'Peter', 'id' => 100));
+
+$builder->betweenWhere('price', 100.25, 200.50);
+
+$builder->notBetweenWhere('price', 100.25, 200.50);
+
+$builder->inWhere('id', [1, 2, 3]);
+
+$builder->notInWhere('id', [1, 2, 3]);
+
+$builder->orderBy('Robots.name');
+$builder->orderBy(array('1', 'Robots.name'));
+
+$builder->having('SUM(Robots.price) > 0');
+
+$builder->forUpdate(true);
+
+$builder->limit(100);
+$builder->limit(100, 20);
+
+$builder->offset(30);
+
+$builder->groupBy(array('Robots.name'));
+
+
+                </code>
+            </pre>
+            <hr>
+            <!-- END Query Builder -->
 
 
             <!-- BEGIN ODM -->
